@@ -1,7 +1,11 @@
+import 'package:adevs/core/utils/services/api_service.dart';
+import 'package:adevs/core/utils/services/token_service.dart';
+
 class AuthRepository {
   final ApiService apiService;
+  final TokenService tokenService;
 
-  AuthRepository(this.apiService);
+  AuthRepository({required this.apiService, required this.tokenService});
 
   Future<void> sendCode(String email) async {
     final response = await apiService.post(
@@ -9,7 +13,7 @@ class AuthRepository {
       body: {'email': email},
     );
     if (response.statusCode != 200) {
-      throw Exception('Failed to send code');
+      throw Exception('Failed to send code: ${response.body}');
     }
   }
 
@@ -18,10 +22,13 @@ class AuthRepository {
       '/confirm_code',
       body: {'email': email, 'code': code},
     );
+
     if (response.statusCode == 200) {
-      return TokenPair.fromJson(response.body);
+      final tokens = TokenPair.fromJson(response.body);
+      await tokenService.saveTokens(tokens);
+      return tokens;
     } else {
-      throw Exception('Invalid code');
+      throw Exception('Invalid code: ${response.statusCode}');
     }
   }
 }

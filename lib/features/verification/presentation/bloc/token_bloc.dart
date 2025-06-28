@@ -1,6 +1,10 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'dart:async';
 
+import 'package:adevs/core/utils/services/token_service.dart';
+import 'package:adevs/features/verification/presentation/bloc/token_event.dart';
+import 'package:adevs/features/verification/presentation/bloc/token_state.dart';
+import 'package:adevs/repositories/token_repository.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class TokenBloc extends Bloc<TokenEvent, TokenState> {
   final TokenRepository tokenRepo;
@@ -10,6 +14,7 @@ class TokenBloc extends Bloc<TokenEvent, TokenState> {
     on<LoadUserEvent>(_onLoadUser);
     on<RefreshTokenEvent>(_onRefreshToken);
     on<TokenExpiredEvent>(_onTokenExpired);
+    on<LogoutEvent>(_onLogout);
   }
 
   void _onLoadUser(LoadUserEvent event, Emitter<TokenState> emit) async {
@@ -22,7 +27,10 @@ class TokenBloc extends Bloc<TokenEvent, TokenState> {
     }
   }
 
-  void _onRefreshToken(RefreshTokenEvent event, Emitter<TokenState> emit) async {
+  void _onRefreshToken(
+    RefreshTokenEvent event,
+    Emitter<TokenState> emit,
+  ) async {
     try {
       final newTokens = await tokenRepo.refreshToken(event.refreshToken);
       final userId = await tokenRepo.getUserId(newTokens.jwt);
@@ -37,11 +45,23 @@ class TokenBloc extends Bloc<TokenEvent, TokenState> {
     emit(TokenExpired());
   }
 
+  Future<void> _onLogout(LogoutEvent event, Emitter<TokenState> emit) async {
+    try {
+      _tokenRefreshTimer?.cancel();
+
+      await tokenRepo.revokeToken();
+
+      emit(TokenRevoked());
+    } catch (e) {
+      emit(TokenError('Logout failed: ${e.toString()}'));
+    }
+  }
+
   void _scheduleTokenRefresh(TokenPair tokens) {
     _tokenRefreshTimer?.cancel();
     _tokenRefreshTimer = Timer(
-      const Duration(minutes: 55), // Обновляем за 5 мин до истечения
-          () => add(RefreshTokenEvent(tokens.refreshToken)),
+      const Duration(hours: 1),
+      () => add(RefreshTokenEvent(tokens.refreshToken)),
     );
   }
 

@@ -15,3 +15,5 @@ class VerifyCodeEvent extends AuthEvent {
 
   VerifyCodeEvent(this.email, this.code);
 }
+
+class LogoutEvent extends AuthEvent {}
