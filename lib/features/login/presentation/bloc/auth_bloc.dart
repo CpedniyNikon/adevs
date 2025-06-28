@@ -30,14 +30,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   void _onVerifyCode(VerifyCodeEvent event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
-      debugPrint(event.email);
-      debugPrint(event.code);
       final tokens = await authRepo.verifyCode(event.email, event.code);
-      debugPrint("${tokens.jwt}");
-      debugPrint("${tokens.refreshToken}");
       emit(CodeVerifyingSuccess(tokens, event.email));
     } catch (e) {
-      emit(CodeVerifyingFailure('Invalid verification code'));
+      emit(CodeVerifyingFailure('Invalid verification code', event.email));
     }
   }
 

@@ -53,9 +53,10 @@ class CodeVerifyingSuccess extends AuthState {
 
 class CodeVerifyingFailure extends AuthState {
   final String error;
+  final String email;
 
-  const CodeVerifyingFailure(this.error);
+  const CodeVerifyingFailure(this.error, this.email);
 
   @override
-  List<Object> get props => [error];
+  List<Object> get props => [error, email];
 }

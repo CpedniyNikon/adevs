@@ -1,5 +1,6 @@
 import 'package:adevs/core/utils/services/api_service.dart';
 import 'package:adevs/core/utils/services/token_service.dart';
+import 'package:flutter/widgets.dart';
 
 class AuthRepository {
   final ApiService apiService;
@@ -22,7 +23,7 @@ class AuthRepository {
       '/confirm_code',
       body: {'email': email, 'code': code},
     );
-
+    debugPrint("${response.body}");
     if (response.statusCode == 200) {
       final tokens = TokenPair.fromJson(response.body);
       await tokenService.saveTokens(tokens);

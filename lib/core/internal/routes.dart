@@ -1,4 +1,4 @@
-import 'package:adevs/features/home/home_screen.dart';
+import 'package:adevs/features/home/presentation/home_screen.dart';
 import 'package:adevs/features/login/presentation/login_screen.dart';
 import 'package:adevs/features/verification/presentation/verification_screen.dart';
 import 'package:flutter/material.dart';
